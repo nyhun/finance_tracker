@@ -1,18 +1,9 @@
 const Database = require('better-sqlite3');
 
-// Custom random function with fixed seed (adapted from: https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript)
-// It's not uniformly distributed, but for this exercise will do
-// Needed because Math doesn't have a built in way to fix the seed (which we need for consistency)
-let seed = 1;
-function random() {
-  var x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-}
+const db = new Database('./db/database.sqlite');
+console.log("Connected to DB");
 
-function initDB() {
-  console.log("Setting up DB connection...");
-  const db = new Database('./db/database.sqlite');
-
+function initDB(db) {
   const init = db.transaction(() => {
     db.prepare(`
       CREATE TABLE IF NOT EXISTS transactions (
@@ -27,7 +18,7 @@ function initDB() {
     const count = db.prepare(`SELECT COUNT(*) AS count FROM transactions`).get().count;
 
     if (count === 0) {
-      console.log('Adding dummy records...');
+      console.log('Initializing with dummy records...');
 
       const insert = db.prepare(`
         INSERT INTO transactions (type, amount, category, date)
@@ -35,11 +26,11 @@ function initDB() {
       `);
 
       for (let i = 1; i <= 9; i++) {
-        for (let j = 0; j < 5; j++) {
+        for (let j = 0; j < 10; j++) {
           const type = j % 2 === 0 ? 'income' : 'expense';
-          const amount = parseFloat(random().toFixed(2));
-          const category = 'salary';
-          const date = `2025-01-${i.toString().padStart(2, '0')}`;
+          const amount = parseFloat((Math.random() * 1000).toFixed(2));
+          const category = Math.random() < 0.5 ? 'salary' : 'groceries';
+          const date = `2025-${i.toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
           insert.run(type, amount, category, date);
         }
       }
@@ -47,8 +38,74 @@ function initDB() {
   });
 
   init();
-
-  return db;
 }
 
-module.exports = { initDB };
+function insertTransaction({ type, amount, category, date }) {
+  const stmt = db.prepare(`
+    INSERT INTO transactions (type, amount, category, date)
+    VALUES (?, ?, ?, ?)
+  `);
+  const result = stmt.run(type, amount, category, date);
+  return result.lastInsertRowid;
+}
+
+function updateTransactionById(id, { type, amount, category, date }) {
+  const stmt = db.prepare(`
+    UPDATE transactions
+    SET type = ?, amount = ?, category = ?, date = ?
+    WHERE id = ?
+  `);
+  const result = stmt.run(type, amount, category, date, id);
+  return result.changes > 0;
+}
+
+function deleteTransactionById(id) {
+  const stmt = db.prepare(`DELETE FROM transactions WHERE id = ?`);
+  const result = stmt.run(id);
+  return result.changes > 0;
+}
+
+function getTransactionsInDateRange({ startDate, endDate, category }) {
+  const params = [startDate, endDate];
+  let filter = '';
+
+  if (category) {
+    filter = ' AND category = ?';
+    params.push(category);
+  }
+
+  const stmt = db.prepare(
+    `SELECT * FROM transactions WHERE date BETWEEN ? AND ?${filter}`
+  );
+  return stmt.all(...params);
+}
+
+function getTransactionsWithFilters({ category, from, to }) {
+  let query = 'SELECT * FROM transactions WHERE 1=1';
+  const params = [];
+
+  if (category) {
+    query += ' AND category = ?';
+    params.push(category);
+  }
+  if (from) {
+    query += ' AND date >= ?';
+    params.push(from);
+  }
+  if (to) {
+    query += ' AND date <= ?';
+    params.push(to);
+  }
+
+  return db.prepare(query).all(...params);
+}
+
+module.exports = {
+  db,
+  initDB,
+  insertTransaction,
+  updateTransactionById,
+  deleteTransactionById,
+  getTransactionsInDateRange,
+  getTransactionsWithFilters,
+};

@@ -1,13 +1,15 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3000;
-const { initDB } = require('./db/db'); 
-
-// Middleware (optional)
-app.use(express.json()); // To parse JSON bodies
+const { initDB, db } = require('./db/db'); 
+const transactionsRoutes = require('./routes/transactions');
 
 // Initiate DB
-const db = initDB()
+initDB(db);
+
+// Middleware
+app.use(express.json()); 
+app.use('/api/transactions', transactionsRoutes);
 
 // Basic route
 app.get('/', (req, res) => {
