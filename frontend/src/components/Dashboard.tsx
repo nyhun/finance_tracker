@@ -1,12 +1,21 @@
 import { getSummary } from '../services/api';
-import { useEffect, useState } from 'react';
-import { Box, Typography, TextField, MenuItem, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { saveAs } from 'file-saver';
+import { Box, Typography, TextField, MenuItem, Table, TableHead, TableRow, TableCell, TableBody, Button } from '@mui/material';
 import type { SummaryResponse } from '../services/api';
 
 const Dashboard = () => {
     const [month, setMonth] = useState("1"); // string
     const [year, setYear] = useState("2025");
     const [summary, setSummary] = useState<SummaryResponse | null>(null);
+
+    const exportTransactionsAsCSV = () => {
+        // TODO: use a package, because manually creating CSV is error prone (quotes, newlines, etc.)
+        if (!summary) return;
+        const csv = summary.transactions.map((tx) => [tx.type, tx.amount, tx.category, tx.date].join(',')).join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        saveAs(blob, 'transactions.csv');
+    };
 
     useEffect(() => {
         getSummary(month, year).then((res) => {
@@ -87,6 +96,9 @@ const Dashboard = () => {
             {summary && summary.transactions.length <= 0 && (
                 <Typography variant="h5">No transactions found</Typography>
             )}
+            <Box mt={3} sx={{ width: '100%' }}>
+                <Button variant="contained" fullWidth onClick={exportTransactionsAsCSV}>Export Transactions as CSV</Button>
+            </Box>
         </Box>
     );
 };
