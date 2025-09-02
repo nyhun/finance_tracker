@@ -1,7 +1,7 @@
 const app = require('./app');
-const { initDB } = require('./db/db');
+const { db, initDB } = require('./db/db');
 
-initDB(); 
+initDB(db); 
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
