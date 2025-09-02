@@ -1,6 +1,6 @@
 const request = require('supertest');
-const app = require('../app');
-const { initDB } = require('../db/db');
+const app = require('../../app');
+const { initDB } = require('../../db/db');
 const Database = require('better-sqlite3');
 
 const db = new Database('./database-test.sqlite');
