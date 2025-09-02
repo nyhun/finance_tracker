@@ -59,7 +59,19 @@ export default function BasicTabs() {
         <TransactionList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <TransactionForm onSubmit={(tx) => createTransaction(tx)} />
+        <TransactionForm
+          onSubmit={(tx) => {
+            createTransaction(tx).then(
+              () => {
+                alert('Transaction created successfully');
+              },
+              (err) => {
+                console.error(err);
+                alert('Failed to create transaction');
+              }
+            );
+          }}
+        />
       </CustomTabPanel>
     </Box>
   );
