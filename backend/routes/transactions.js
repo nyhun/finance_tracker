@@ -35,7 +35,7 @@ router.put('/:id', (req, res) => {
 
     try {
         const updated = transactionService.updateTransaction(id, { type, amount, category, date });
-        if (updated) res.json({ success: true });
+        if (updated) res.json({ type, amount, category, date, id: parseInt(id) });
         else res.status(404).json({ error: 'Transaction not found' });
     } catch (err) {
         res.status(500).json({ error: 'Failed to update transaction' });
