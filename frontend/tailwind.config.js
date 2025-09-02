@@ -1,8 +1,13 @@
-/** @type {import('tailwindcss').Config} */
+import { materialTailwindConfig } from "@material-tailwind/react/utils";
+
 export default {
-    content: ["./src/**/*.{html,js,ts,jsx,tsx}"],
-    theme: {
-      extend: {},
-    },
-    plugins: [],
-}
+  content: [
+    "./index.html",
+    "./src/**/*.{js,jsx}",
+    ...materialTailwindConfig.content,
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+};
