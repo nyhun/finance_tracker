@@ -80,7 +80,7 @@ function getTransactionsInDateRange({ startDate, endDate, category }) {
   return stmt.all(...params);
 }
 
-function getTransactionsWithFilters({ category, from, to }) {
+function getTransactionsWithFilters({ category, from, to, offset, limit }) {
   let query = 'SELECT * FROM transactions WHERE 1=1';
   const params = [];
 
@@ -95,6 +95,15 @@ function getTransactionsWithFilters({ category, from, to }) {
   if (to) {
     query += ' AND date <= ?';
     params.push(to);
+  }
+
+  if (limit) {
+    query += ' LIMIT ? ';
+    params.push(limit);
+  }
+  if (offset) {
+    query += ' OFFSET ? ';
+    params.push(offset);
   }
 
   return db.prepare(query).all(...params);

@@ -1,12 +1,10 @@
 const request = require('supertest');
 const app = require('../../app');
-const { initDB } = require('../../db/db');
-const Database = require('better-sqlite3');
-
-const db = new Database('./database-test.sqlite');
+const { db } = require('../../db/db');
 
 beforeAll(() => {
-    initDB(db);
+    // TODO: this wipes db -- use a test db file instead
+    db.prepare(`DELETE FROM transactions`).run();
 });
 
 afterAll(() => {
@@ -16,6 +14,14 @@ afterAll(() => {
 
 describe('Transactions API', () => {
     let createdId;
+
+    it('should get an empty list of transactions', async () => {
+        const res = await request(app)
+            .get('/api/transactions');
+
+        expect(res.statusCode).toBe(200);
+        expect(res.body).toEqual([]);
+    });
 
     it('should create a new income transaction', async () => {
         const res = await request(app)

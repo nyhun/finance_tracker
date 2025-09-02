@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const transactionService = require('../services/transactions');
 
+router.get('/', (req, res) => {
+    const { category, from, to, offset = 0, limit = 10 } = req.query;
+
+    try {
+        const transactions = transactionService.getTransactions({ category, from, to, offset, limit });
+        res.json(transactions);
+    } catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 router.post('/', (req, res) => {
     const { type, amount, category, date } = req.body;
 
