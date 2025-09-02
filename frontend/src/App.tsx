@@ -5,6 +5,7 @@ import Box from '@mui/material/Box';
 import Dashboard from './components/Dashboard';
 import TransactionList from './components/TransactionList';
 import TransactionForm from './components/TransactionForm';
+import { createTransaction, fetchTransactions } from './services/api';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -58,7 +59,7 @@ export default function BasicTabs() {
         <TransactionList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={2}>
-        <TransactionForm/>
+        <TransactionForm onSubmit={(tx) => createTransaction(tx)} />
       </CustomTabPanel>
     </Box>
   );

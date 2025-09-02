@@ -81,33 +81,49 @@ function getTransactionsInDateRange({ startDate, endDate, category }) {
 }
 
 function getTransactionsWithFilters({ category, from, to, offset, limit }) {
-  let query = 'SELECT * FROM transactions WHERE 1=1';
-  const params = [];
+  const baseQuery = 'FROM transactions WHERE 1=1';
+  const filters = [];
+  const filterParams = [];
 
   if (category) {
-    query += ' AND category = ?';
-    params.push(category);
+    filters.push('AND category = ?');
+    filterParams.push(category);
   }
   if (from) {
-    query += ' AND date >= ?';
-    params.push(from);
+    filters.push('AND date >= ?');
+    filterParams.push(from);
   }
   if (to) {
-    query += ' AND date <= ?';
-    params.push(to);
+    filters.push('AND date <= ?');
+    filterParams.push(to);
   }
 
-  if (limit) {
-    query += ' LIMIT ? ';
-    params.push(limit);
-  }
-  if (offset) {
-    query += ' OFFSET ? ';
-    params.push(offset);
-  }
+  const runInTransaction = db.transaction(() => {
+    // Total count query
+    const countQuery = `SELECT COUNT(*) as total ${baseQuery} ${filters.join(' ')}`;
+    const total = db.prepare(countQuery).get(...filterParams).total;
 
-  return db.prepare(query).all(...params);
+    // Data query with limit and offset
+    let dataQuery = `SELECT * ${baseQuery} ${filters.join(' ')}`;
+    const dataParams = [...filterParams];
+
+    if (limit) {
+      dataQuery += ' LIMIT ?';
+      dataParams.push(limit);
+    }
+    if (offset) {
+      dataQuery += ' OFFSET ?';
+      dataParams.push(offset);
+    }
+
+    const transactions = db.prepare(dataQuery).all(...dataParams);
+
+    return { total, transactions };
+  });
+
+  return runInTransaction();
 }
+
 
 module.exports = {
   db,

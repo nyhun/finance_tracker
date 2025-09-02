@@ -6,9 +6,10 @@ import type { Transaction } from '../types/transaction';
 
 interface Props {
   initialData?: Transaction;
+  onSubmit: (tx: Transaction) => void;
 }
 
-const TransactionForm: React.FC<Props> = ({ initialData }) => {
+const TransactionForm: React.FC<Props> = ({ initialData, onSubmit }) => {
   const [form, setForm] = useState<Transaction>(
     initialData || { type: 'expense', amount: 0, category: '', date: '' }
   );

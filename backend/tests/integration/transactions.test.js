@@ -20,7 +20,10 @@ describe('Transactions API', () => {
             .get('/api/transactions');
 
         expect(res.statusCode).toBe(200);
-        expect(res.body).toEqual([]);
+        expect(res.body).toHaveProperty('transactions');
+        expect(res.body.transactions).toEqual([]);
+        expect(res.body).toHaveProperty('total');
+        expect(res.body.total).toBe(0);
     });
 
     it('should create a new income transaction', async () => {

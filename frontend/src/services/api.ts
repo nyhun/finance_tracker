@@ -11,8 +11,8 @@ export interface SummaryResponse {
   transactions: Transaction[];
 }
 
-export const fetchTransactions = async (params = {}) =>
-  (await axios.get<Transaction[]>(API_URL, { params })).data;
+export const fetchTransactions = async (params: { offset?: number, limit?: number } = {}) =>
+  (await axios.get<{ transactions: Transaction[], total: number }>(API_URL, { params })).data;
 
 export const createTransaction = async (transaction: Transaction) =>
   (await axios.post<Transaction>(API_URL, transaction)).data;
