@@ -56,7 +56,16 @@ const TransactionForm: React.FC<Props> = ({ initialData, onSubmit }) => {
           onChange={handleChange}
           InputLabelProps={{ shrink: true }}
         />
-        <Button variant="contained" onClick={() => onSubmit(form)}>
+        <Button
+          variant="contained"
+          disabled={
+            !form.type ||
+            !form.amount ||
+            !form.category ||
+            !form.date
+          }
+          onClick={() => onSubmit(form)}
+        >
           {initialData ? 'Update' : 'Add'} Transaction
         </Button>
       </Stack>
